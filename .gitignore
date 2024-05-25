@@ -1,0 +1,57 @@
+# Node.js dependencies
+/node_modules
+
+# Compiled output (Nest.js)
+/dist
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+
+# OS specific files
+.DS_Store
+
+# Test coverage reports
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Next.js build output
+/.next
+/out
+
+# Production build output
+/build
+
+# Miscellaneous
+*.pem
+
+# Local environment files
+.env
+.env*.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
