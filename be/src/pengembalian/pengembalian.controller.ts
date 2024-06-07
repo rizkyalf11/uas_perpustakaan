@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { PengembalianService } from './pengembalian.service';
 import { CreatePengembalianDto, FindPengembalianDto } from './pengembalian.dto';
 import { RolesGuard } from 'src/auth/roles.guard';
@@ -23,5 +23,18 @@ export class PengembalianController {
   @Get('/list')
   pinjaman(@Pagination() payload: FindPengembalianDto) {
     return this.pengembalianService.getAllPengembalian(payload);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(StaffRole.ADMIN)
+  @Get('/detail/:id')
+  pinjamanDetail(
+    @Param('id') id: string,
+    @Pagination() payload: FindPengembalianDto,
+  ) {
+    return this.pengembalianService.getAllPengembalianDetail(
+      Number(+id),
+      payload,
+    );
   }
 }

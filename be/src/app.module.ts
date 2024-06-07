@@ -17,6 +17,9 @@ import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { Staff } from './staff/staff.entity';
 import { Anggota } from './anggota/anggota.entity';
+import { MailModule } from './mail/mail.module';
+import { ResetPassword } from './auth/resetpw.entity';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -24,7 +27,7 @@ import { Anggota } from './anggota/anggota.entity';
       rootPath: join(__dirname, '..', 'public'),
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigAsync),
-    TypeOrmModule.forFeature([Staff, Anggota]),
+    TypeOrmModule.forFeature([Staff, Anggota, ResetPassword]),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -35,6 +38,8 @@ import { Anggota } from './anggota/anggota.entity';
     PeminjamanModule,
     StaffModule,
     PengembalianModule,
+    MailModule,
+    ChatModule,
   ],
   controllers: [UploadController, AuthController],
   providers: [AuthService],

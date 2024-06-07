@@ -1,4 +1,11 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Message } from 'src/chat/msg.entity';
+import {
+  Entity,
+  BaseEntity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+} from 'typeorm';
 
 export enum StaffRole {
   ADMIN = 'admin',
@@ -27,6 +34,9 @@ export class Staff extends BaseEntity {
 
   @Column({ nullable: true })
   refresh_token: string;
+
+  @OneToMany(() => Message, (message) => message.penerima)
+  sentMessages: Message[];
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

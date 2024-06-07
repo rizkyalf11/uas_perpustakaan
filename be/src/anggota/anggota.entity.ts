@@ -1,3 +1,5 @@
+import { ResetPassword } from 'src/auth/resetpw.entity';
+import { Message } from 'src/chat/msg.entity';
 import { Peminjaman } from 'src/peminjaman/peminjaman.entity';
 import {
   Entity,
@@ -31,6 +33,12 @@ export class Anggota extends BaseEntity {
     cascade: ['insert', 'update'],
   })
   peminjaman: Peminjaman[];
+
+  @OneToMany(() => ResetPassword, (reset) => reset.anggota_id)
+  reset_password: ResetPassword;
+
+  @OneToMany(() => Message, (message) => message.penerima)
+  receivedMessages: Message[];
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

@@ -1,10 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import BaseResponse from 'src/utils/response/base.response';
 import { Anggota } from './anggota.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { RegisterDto } from './anggota.dto';
-import { ResponseSuccess } from 'src/interface/response';
+import { Like, Repository } from 'typeorm';
+import { FindAnggota, RegisterDto } from './anggota.dto';
+import { ResponsePagination, ResponseSuccess } from 'src/interface/response';
 import { hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { jwtPayload } from '../auth/jwt.interface';
@@ -131,7 +136,7 @@ export class AnggotaService extends BaseResponse {
         is_return: false,
         id_anggota: { id },
       },
-      relations: ['id_anggota'],
+      relations: ['id_anggota', 'id_buku'],
     });
 
     return this._success('OK', listBuku);
@@ -144,9 +149,52 @@ export class AnggotaService extends BaseResponse {
         is_return: true,
         id_anggota: { id },
       },
-      relations: ['id_anggota'],
+      relations: ['id_anggota', 'id_buku', 'pengembalian'],
     });
 
     return this._success('OK', listBuku);
+  }
+
+  async getAllAnggota(query: FindAnggota): Promise<ResponsePagination> {
+    const { keyword, page, pageSize, limit } = query;
+
+    const filterKeyword = [];
+
+    if (keyword) {
+      filterKeyword.push(
+        {
+          nama: Like(`%${keyword}%`),
+        },
+        {
+          email: Like(`%${keyword}%`),
+        },
+      );
+    }
+
+    const total = await this.anggotaRepo.count({
+      where: filterKeyword,
+    });
+
+    const list = await this.anggotaRepo.find({
+      where: filterKeyword,
+      skip: limit,
+      take: pageSize,
+    });
+
+    return this._pagination('OK', list, total, page, pageSize);
+  }
+
+  async getAnggotaDetail(id: number): Promise<ResponseSuccess> {
+    const anggota = await this.anggotaRepo.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (anggota === null) {
+      throw new NotFoundException(`Anggota dengan id ${id} tidak ditemukan`);
+    }
+
+    return this._success('OK', anggota);
   }
 }

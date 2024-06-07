@@ -1,5 +1,11 @@
 import { OmitType } from '@nestjs/mapped-types';
-import { IsDate, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { PageRequestDto } from 'src/utils/dto/page-request.dto';
 
 export class PengembalianDto {
@@ -23,6 +29,6 @@ export class CreatePengembalianDto extends OmitType(PengembalianDto, ['id']) {}
 
 export class FindPengembalianDto extends PageRequestDto {
   @IsOptional()
-  @IsNumber()
-  id_anggota: number;
+  @IsString()
+  email: string;
 }

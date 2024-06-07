@@ -3,9 +3,11 @@ import {
   IsEmail,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
+import { PageRequestDto } from 'src/utils/dto/page-request.dto';
 
 export class AnggotaDto {
   @IsInt()
@@ -41,3 +43,9 @@ export class RegisterDto extends PickType(AnggotaDto, [
 ]) {}
 
 export class LoginDto extends PickType(AnggotaDto, ['email', 'password']) {}
+
+export class FindAnggota extends PageRequestDto {
+  @IsOptional()
+  @IsString()
+  keyword: string;
+}

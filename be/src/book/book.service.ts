@@ -57,6 +57,19 @@ export class BookService extends BaseResponse {
     return this._success('Berhasil menghapus buku');
   }
 
+  async detialBook(id: number): Promise<ResponseSuccess> {
+    const check = await this.bukuRepo.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!check)
+      throw new NotFoundException(`Buku dengan id ${id} tidak ditemukan`);
+
+    return this._success('Data Buku Ditemukan', check);
+  }
+
   async updateBook(
     id: number,
     updateBookDto: UpdateBukuDto,
@@ -98,17 +111,18 @@ export class BookService extends BaseResponse {
     }
 
     if (dari_tahun_terbit && sampai_tahun_terbit) {
-      filter.year = Between(dari_tahun_terbit, sampai_tahun_terbit);
+      filter.tahun_terbit = Between(dari_tahun_terbit, sampai_tahun_terbit);
     }
 
     if (dari_tahun_terbit && !!sampai_tahun_terbit === false) {
-      filter.year = Between(dari_tahun_terbit, dari_tahun_terbit);
+      filter.tahun_terbit = Between(dari_tahun_terbit, dari_tahun_terbit);
     }
 
     const result = await this.bukuRepo.find({
       where: filter,
       skip: limit,
       take: pageSize,
+      relations: ['created_by', 'updated_by'],
     });
 
     return this._pagination('OK', result, total, page, pageSize);

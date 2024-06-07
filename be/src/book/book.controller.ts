@@ -37,6 +37,13 @@ export class BookController {
 
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(StaffRole.PUSTAKAWAN)
+  @Get('detail/:id')
+  detailBook(@Param('id') id: string) {
+    return this.bukuService.detialBook(+id);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(StaffRole.PUSTAKAWAN)
   @Put('update/:id')
   updateBook(
     @Param('id') id: string,

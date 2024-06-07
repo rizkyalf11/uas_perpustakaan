@@ -1,8 +1,13 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BaseResponse from 'src/utils/response/base.response';
 import { Pengembalian } from './pengembalian.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { CreatePengembalianDto, FindPengembalianDto } from './pengembalian.dto';
 import { ResponsePagination, ResponseSuccess } from 'src/interface/response';
 import { Peminjaman } from 'src/peminjaman/peminjaman.entity';
@@ -71,14 +76,14 @@ export class PengembalianService extends BaseResponse {
   async getAllPengembalian(
     payload: FindPengembalianDto,
   ): Promise<ResponsePagination> {
-    const { page, pageSize, id_anggota, limit } = payload;
+    const { page, pageSize, email, limit } = payload;
 
     const filter: { [title: string]: any } = {};
 
-    if (id_anggota) {
+    if (email) {
       filter.peminjaman_id = {
         id_anggota: {
-          id: id_anggota,
+          email: Like(`%${email}%`),
         },
       };
     }
@@ -89,7 +94,11 @@ export class PengembalianService extends BaseResponse {
       },
       skip: limit,
       take: pageSize,
-      relations: ['peminjaman_id', 'peminjaman_id.id_anggota'],
+      relations: [
+        'peminjaman_id',
+        'peminjaman_id.id_anggota',
+        'peminjaman_id.id_buku',
+      ],
     });
 
     return this._pagination(
@@ -99,5 +108,45 @@ export class PengembalianService extends BaseResponse {
       page,
       pageSize,
     );
+  }
+
+  async getAllPengembalianDetail(
+    id: number,
+    payload: FindPengembalianDto,
+  ): Promise<ResponsePagination> {
+    const { page, pageSize, limit } = payload;
+
+    const listpengembalian = await this.pengembalianRepo.find({
+      where: {
+        peminjaman_id: {
+          id_anggota: {
+            id: id,
+          },
+        },
+      },
+      skip: limit,
+      take: pageSize,
+      relations: [
+        'peminjaman_id',
+        'peminjaman_id.id_anggota',
+        'peminjaman_id.id_buku',
+      ],
+    });
+
+    if (listpengembalian === null) {
+      throw new NotFoundException(`Anggota dengan id ${id} tidak ditemukan`);
+    }
+
+    const total = await this.pengembalianRepo.count({
+      where: {
+        peminjaman_id: {
+          id_anggota: {
+            id: id,
+          },
+        },
+      },
+    });
+
+    return this._pagination('Success', listpengembalian, total, page, pageSize);
   }
 }
