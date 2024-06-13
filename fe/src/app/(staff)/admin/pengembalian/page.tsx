@@ -6,6 +6,7 @@ import { Form, FormikProvider, useFormik } from "formik";
 import { useIdStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useSocket } from "@/components/socketContext";
 
 const createPengembalianSchema = yup.object().shape({
   tanggal_pengembalian: yup
@@ -20,6 +21,7 @@ export default function Pengembalian() {
   const { useCreatePengembalian } = useAdminModule();
   const { isPending, mutate } = useCreatePengembalian();
   const router = useRouter();
+  const { socket } = useSocket();
 
   const { setIsSelectPEMINJAMAN, peminjaman } = useIdStore();
 
@@ -30,6 +32,11 @@ export default function Pengembalian() {
     enableReinitialize: true,
     onSubmit: (val) => {
       mutate(val);
+      if(socket){
+        socket.emit('trigPengembalian', {
+          id_anggota: peminjaman?.id_anggota
+        })
+      }
     },
   });
 
@@ -37,7 +44,8 @@ export default function Pengembalian() {
 
   useEffect(() => {
     if (peminjaman) {
-      setFieldValue("peminjaman_id", peminjaman);
+      setFieldValue("peminjaman_id", peminjaman.id_peminjaman);
+      console.log(peminjaman.id_peminjaman)
     }
   }, [peminjaman, setFieldValue]);
 
@@ -61,7 +69,7 @@ export default function Pengembalian() {
               >
                 {peminjaman != undefined && (
                   <h3 className="text-md text-black">
-                    {peminjaman != undefined && `ID PEMINJAMAN: ${peminjaman}`}
+                    {peminjaman.id_peminjaman != undefined && `ID PEMINJAMAN: ${peminjaman.id_peminjaman}`}
                   </h3>
                 )}
                 {peminjaman == undefined && (

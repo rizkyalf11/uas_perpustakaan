@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { ReactNode } from "react";
 import { Session } from "next-auth";
 import NextAuthProvider from "@/components/NextAuthProvider";
+import { SocketProvider } from "@/components/socketContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,10 +25,12 @@ export default function RootLayout({ children, session }: NextAuthProps) {
     <html lang="en">
       <body className={inter.className } style={{backgroundColor: '#fafafa'}}>
         <NextAuthProvider session={session}>
-          <ReactQuery>
-            <Toaster position="top-center" reverseOrder={false} />
-            {children}
-          </ReactQuery>
+          <SocketProvider>
+            <ReactQuery>
+              <Toaster position="top-center" reverseOrder={false} />
+              {children}
+            </ReactQuery>
+          </SocketProvider>
         </NextAuthProvider>
       </body>
     </html>

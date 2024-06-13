@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useSession } from "next-auth/react";
@@ -106,9 +107,13 @@ export default function Admin() {
                   <td>{_.tahun_terbit}</td>
                   <td>{_.jumlah_kopi}</td>
                   <td>
-                    <Link href={_.cover} className="underline" target="_blank">
-                      link
-                    </Link>
+                    <div className="h-20 w-20 bg-red-200">
+                      <img
+                        src={_.cover}
+                        alt={_.judul}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                   </td>
                   <td>{_.created_by.nama}</td>
                   <td>{_.updated_by?.nama ? _.updated_by?.nama : "-"}</td>

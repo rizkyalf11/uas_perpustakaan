@@ -6,6 +6,7 @@ import useAdminModule from "../lib";
 import { useIdStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useSocket } from "@/components/socketContext";
 
 const getDatePlusDays = (days: number) => {
   const date = new Date();
@@ -32,6 +33,7 @@ export default function Peminjaman() {
   const { useCreatePeminjaman } = useAdminModule();
   const { isPending, mutate } = useCreatePeminjaman();
   const router = useRouter();
+  const { socket } = useSocket();
 
   const { book, anggota, setIsSelectBOOK, setIsSelectANGGOTA } = useIdStore();
 
@@ -41,6 +43,11 @@ export default function Peminjaman() {
     enableReinitialize: true,
     onSubmit: (val) => {
       mutate(val);
+      if(socket) {
+        socket.emit('trigPeminjaman', {
+          id_anggota: anggota?.id
+        })
+      }
     },
   });
 

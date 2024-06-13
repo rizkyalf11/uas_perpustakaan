@@ -1,10 +1,28 @@
 "use client"
 
+import { useEffect } from "react";
 import useAnggotaModule from "../lib"
+import { useSocket } from "@/components/socketContext";
 
 export default function Peminjaman() {
   const { useListPinjaman } = useAnggotaModule(); 
   const { data, isPending } = useListPinjaman();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if(!socket) return;
+
+    const handleTrigPeminjaman = (data: any) => {
+      window.location.reload()
+    };
+
+
+    socket.on('trigPeminjaman', handleTrigPeminjaman);
+
+    return () => {
+      socket?.off("trigPeminjaman");
+    };
+  }, [socket])
 
   return (
     <div>

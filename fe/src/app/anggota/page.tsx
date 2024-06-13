@@ -5,7 +5,8 @@ import usePustakawanModule from "../(staff)/pustakawan/lib";
 import BookCard from "@/components/BookCard";
 import SkelBookCard from "@/components/SkelBookCard";
 import { Pagination } from "@/components/Pagination";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSocket } from "@/components/socketContext";
 
 export default function Anggota() {
   const { useListBook } = usePustakawanModule();
@@ -69,7 +70,7 @@ export default function Anggota() {
       </div>
 
       {!isSearch && (
-        <div className="join mt-4 grid grid-cols-2">
+        <div className="join my-4 grid grid-cols-2">
           <button
             onClick={() =>
               setFilterParams((prev) => {

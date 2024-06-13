@@ -7,14 +7,16 @@ interface typeState {
   isSelectPEMINJAMAN: boolean;
   book: { id: number; judul: string } | undefined;
   anggota: { id: number; email: string } | undefined;
-  peminjaman: number | undefined;
+  peminjaman: { id_peminjaman: number; id_anggota: number } | undefined;
   selectedAnggota: { id: number; nama: string } | undefined;
   setIsSelectBOOK: (ww: boolean) => void;
   setIsSelectANGGOTA: (ww: boolean) => void;
   setIsSelectPEMINJAMAN: (ww: boolean) => void;
   setBook: (payload: { id: number; judul: string } | undefined) => void;
   setAnggota: (payload: { id: number; email: string } | undefined) => void;
-  setPeminjaman: (payload: number | undefined) => void;
+  setPeminjaman: (
+    payload: { id_peminjaman: number; id_anggota: number } | undefined,
+  ) => void;
   setSelectedAnggota: (
     payload: { id: number; nama: string } | undefined,
   ) => void;
@@ -36,8 +38,9 @@ export const useIdStore = create<typeState>((set) => ({
     set(() => ({ book: payload })),
   setAnggota: (payload: { id: number; email: string } | undefined) =>
     set(() => ({ anggota: payload })),
-  setPeminjaman: (payload: number | undefined) =>
-    set(() => ({ peminjaman: payload })),
+  setPeminjaman: (
+    payload: { id_peminjaman: number; id_anggota: number } | undefined,
+  ) => set(() => ({ peminjaman: payload })),
   setSelectedAnggota: (payload: { id: number; nama: string } | undefined) =>
     set(() => ({ selectedAnggota: payload })),
 }));

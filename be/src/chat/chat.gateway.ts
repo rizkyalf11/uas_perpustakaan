@@ -41,13 +41,13 @@ export class ChatGateway {
       if (user.role == 'admin') {
         this.usersAdmin.push(user);
         this.clients.push(client);
-      } else {
+      } else if (user.role == 'anggota') {
         this.usersAnggota.push(user);
         this.clients.push(client);
       }
 
-      console.log(this.usersAdmin);
-      console.log(this.usersAnggota);
+      console.log('admin', this.usersAdmin);
+      console.log('anggota', this.usersAnggota);
     }
   }
 
@@ -78,8 +78,6 @@ export class ChatGateway {
   async handleMsg(client: any, payload: any) {
     const { penerima, pengirim, text, id_anggota } = payload;
     console.log(payload);
-
-    console.log(client.user);
 
     if (penerima) {
       if (client.user.role == 'admin') {
@@ -118,6 +116,42 @@ export class ChatGateway {
               penerima,
               id_anggota,
             });
+          }
+        }
+      }
+    }
+  }
+
+  @SubscribeMessage('trigPengembalian')
+  async handleTrigPengembalian(client: any, payload: any) {
+    console.log(payload);
+
+    if (payload) {
+      if (client.user.role == 'admin') {
+        for (let i = 0; i < this.clients.length; i++) {
+          if (
+            this.clients[i].user.role == 'anggota' &&
+            this.clients[i].user.id == payload.id_anggota
+          ) {
+            this.clients[i].emit('trigPengembalian');
+          }
+        }
+      }
+    }
+  }
+
+  @SubscribeMessage('trigPeminjaman')
+  async handleTrigPeminjaman(client: any, payload: any) {
+    console.log(payload);
+
+    if (payload) {
+      if (client.user.role == 'admin') {
+        for (let i = 0; i < this.clients.length; i++) {
+          if (
+            this.clients[i].user.role == 'anggota' &&
+            this.clients[i].user.id == payload.id_anggota
+          ) {
+            this.clients[i].emit('trigPeminjaman');
           }
         }
       }

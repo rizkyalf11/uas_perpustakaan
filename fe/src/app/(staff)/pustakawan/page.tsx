@@ -14,19 +14,33 @@ import Link from "next/link";
 export default function Pustakawan() {
   const { data: session, status } = useSession();
   const { useListBook } = usePustakawanModule();
-  const { data, isPending, params, handlePage, handlePageSize, setParams, handleFilter, handleClear, filterParams } = useListBook();
+  const {
+    data,
+    isPending,
+    params,
+    handlePage,
+    handlePageSize,
+    setParams,
+    handleFilter,
+    handleClear,
+    filterParams,
+  } = useListBook();
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [isFilter, setIsFilter] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if(filterParams.judul != '' || filterParams.pengarang != '' || filterParams.dari_tahun_terbit != '' || filterParams.sampai_tahun_terbit != '') {
-      setIsFilter(true)
+    if (
+      filterParams.judul != "" ||
+      filterParams.pengarang != "" ||
+      filterParams.dari_tahun_terbit != "" ||
+      filterParams.sampai_tahun_terbit != ""
+    ) {
+      setIsFilter(true);
     } else {
-      setIsFilter(false)
+      setIsFilter(false);
     }
-
-  }, [filterParams])
+  }, [filterParams]);
 
   if (status == "loading") {
     return <LoadingScreen />;
@@ -53,13 +67,21 @@ export default function Pustakawan() {
             ))}
       </div> */}
 
-      <h1 className="text-2xl font-semibold mb-4">Data Buku</h1>
+      <h1 className="mb-4 text-2xl font-semibold">Data Buku</h1>
 
-      <button onClick={() => setDrawerOpen(true)} className="rounded-md bg-biru1 px-3 py-1 text-putih1 hover:bg-biru2">
-        Filter {isFilter && '✓'}
+      <button
+        onClick={() => setDrawerOpen(true)}
+        className="rounded-md bg-biru1 px-3 py-1 text-putih1 hover:bg-biru2"
+      >
+        Filter {isFilter && "✓"}
       </button>
 
-      <Drawer isOpen={isDrawerOpen} onClose={() => setDrawerOpen(false)} onSubmit={handleFilter} onClear={handleClear} >
+      <Drawer
+        isOpen={isDrawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onSubmit={handleFilter}
+        onClear={handleClear}
+      >
         <Filter params={params} setParams={setParams} />
       </Drawer>
 
@@ -79,35 +101,52 @@ export default function Pustakawan() {
             </tr>
           </thead>
           <tbody>
-            {!isPending && data?.data.map((_, i) => (
-              <tr key={i}>
-                <th>{startIndex + i + 1}</th>
-                <td>{_.judul}</td>
-                <td>{_.pengarang}</td>
-                <td>{_.tahun_terbit}</td>
-                <td>{_.jumlah_kopi}</td>
-                <td><Link href={_.cover} className="underline" target="_blank">link</Link></td>
-                <td>{_.created_by.nama}</td>
-                <td>{_.updated_by?.nama ? _.updated_by?.nama : "-"}</td>
-                <td>
-                  <div className="flex gap-1">
-                    <button onClick={() => router.push(`/pustakawan/${_.id}/edit`)} className="rounded-md bg-blue-500 p-1 text-white hover:bg-blue-600">
-                      <IoPencilOutline />
-                    </button>
-                    <button onClick={() => router.push(`/pustakawan/${_.id}/delete`)} className="rounded-md bg-red-500 p-1 text-white hover:bg-red-600">
-                      <IoTrashOutline />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {!isPending &&
+              data?.data.map((_, i) => (
+                <tr key={i}>
+                  <th>{startIndex + i + 1}</th>
+                  <td>{_.judul}</td>
+                  <td>{_.pengarang}</td>
+                  <td>{_.tahun_terbit}</td>
+                  <td>{_.jumlah_kopi}</td>
+                  <td>
+                    <div className="h-20 w-20 bg-red-200">
+                      <img
+                        src={_.cover}
+                        alt={_.judul}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </td>
+                  <td>{_.created_by.nama}</td>
+                  <td>{_.updated_by?.nama ? _.updated_by?.nama : "-"}</td>
+                  <td>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => router.push(`/pustakawan/${_.id}/edit`)}
+                        className="rounded-md bg-blue-500 p-1 text-white hover:bg-blue-600"
+                      >
+                        <IoPencilOutline />
+                      </button>
+                      <button
+                        onClick={() =>
+                          router.push(`/pustakawan/${_.id}/delete`)
+                        }
+                        className="rounded-md bg-red-500 p-1 text-white hover:bg-red-600"
+                      >
+                        <IoTrashOutline />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
         {isPending && (
-          <div className="w-full justify-center mt-4">
-            <span className="loading loading-spinner loading-sm"></span>  
+          <div className="mt-4 w-full justify-center">
+            <span className="loading loading-spinner loading-sm"></span>
           </div>
-        ) }
+        )}
       </div>
 
       <Pagination

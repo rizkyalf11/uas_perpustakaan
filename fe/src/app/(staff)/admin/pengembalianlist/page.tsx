@@ -5,6 +5,7 @@ import useAdminModule from "../lib";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/LoadingScreen";
 import { Pagination } from "@/components/Pagination";
+import { formatRupiah } from "@/utils/formatrp";
 
 export default function PengembalianList() {
   const { data: session, status } = useSession();
@@ -91,7 +92,7 @@ export default function PengembalianList() {
                   >
                     {_.tanggal_pengembalian}
                   </td>
-                  <td>{_.denda}</td>
+                  <td>{formatRupiah(Number(_.denda))}</td>
                   <td>{_.peminjaman_id.id_buku.judul}</td>
                 </tr>
               ))}

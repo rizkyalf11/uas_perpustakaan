@@ -29,8 +29,6 @@ const PeminjamanList = () => {
     return <LoadingScreen />;
   }
 
-  console.log(data?.data);
-
   const startIndex = (params.page - 1) * params.pageSize;
 
   return (
@@ -88,7 +86,7 @@ const PeminjamanList = () => {
                     if (isSelectPEMINJAMAN) {
                       router.push("/admin/pengembalian");
                       setIsSelectPEMINJAMAN(false);
-                      setPeminjaman(_.id);
+                      setPeminjaman({ id_peminjaman: _.id, id_anggota: _.id_anggota.id });
                     }
                   }}
                   key={i}

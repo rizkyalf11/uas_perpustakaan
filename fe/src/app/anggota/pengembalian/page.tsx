@@ -1,14 +1,33 @@
 "use client"
 
+import { useSocket } from "@/components/socketContext";
 import useAnggotaModule from "../lib"
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { formatRupiah } from "@/utils/formatrp";
 
 export default function Pengembalian() {
   const { useListHistoryPinjaman  } = useAnggotaModule();
   const { data, isPending } = useListHistoryPinjaman();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if(!socket) return;
+
+    const handleTrigPengembalian = (data: any) => {
+      window.location.reload()
+    };
+
+    socket.on('trigPengembalian', handleTrigPengembalian);
+
+    return () => {
+      socket?.off("trigPengembalian");
+    };
+  }, [socket])
 
   return (
     <div>
-      <p className="mt-5 text-xl font-semibold">Data Pinjaman</p>
+      <p className="mt-5 text-xl font-semibold">Data Pengembalian</p>
       
       <div className="mt-2 min-h-[500px] overflow-x-auto">
         <table className="table">
@@ -33,8 +52,8 @@ export default function Pengembalian() {
                   <td>{_.id}</td>
                   <td>{_.id_buku.judul}</td>
                   <td>{_.tanggal_kembali}</td>
-                  <td className={`${_.pengembalian.denda != null && 'text-red-500'}`}>{_.pengembalian.tanggal_pengembalian}</td>
-                  <td>{_.pengembalian.denda}</td>
+                  <td className={`${Number(_.pengembalian.denda) > 0 && 'text-red-500'}`}>{_.pengembalian.tanggal_pengembalian}</td>
+                  <td>{formatRupiah(Number(_.pengembalian.denda))}</td>
                 </tr>
               ))}
           </tbody>

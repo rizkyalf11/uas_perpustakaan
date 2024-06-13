@@ -1,3 +1,4 @@
+// chat.tsx
 "use client";
 
 import useAnggotaModule from "@/app/anggota/lib";
@@ -6,13 +7,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoArrowBackOutline, IoSend } from "react-icons/io5";
-import { io } from "socket.io-client";
+import { useSocket } from "@/components/socketContext"; // Import useSocket
 
 export default function Chat({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
-  const [socket, setSocket] = useState<any>(null);
+  const { socket } = useSocket(); // Access the socket from context
   const { selectedAnggota, setSelectedAnggota } = useIdStore();
   const [newMsg, setNewMsg] = useState<string>("");
   const [msg, setMsg] = useState<any[]>([]);
@@ -20,17 +21,19 @@ export default function Chat({ params }: { params: { id: string } }) {
   const { useGetMsg } = useAnggotaModule();
   const queryClient = useQueryClient();
   const { data, isPending } = useGetMsg(selectedAnggota?.id.toString());
-
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleSendMsg = (e: any) => {
     if (e) e.preventDefault();
 
-    socket.emit("msg", {
-      penerima: "anggota",
-      pengirim: "admin",
-      text: newMsg,
-      id_anggota: selectedAnggota?.id,
-    });
+    if (socket) {
+      socket.emit("msg", {
+        penerima: "anggota",
+        pengirim: "admin",
+        text: newMsg,
+        id_anggota: selectedAnggota?.id,
+      });
+    }
 
     setNewMsg("");
     setMsg((prev) => [
@@ -46,39 +49,25 @@ export default function Chat({ params }: { params: { id: string } }) {
   };
 
   useEffect(() => {
-    const socket = io("http://localhost:5105", {
-      withCredentials: true,
-      query: {
-        username: session?.user.nama,
-        id: session?.user.id,
-        role: session?.user.role,
-      },
-    });
+    if (!socket) return;
 
-    socket.on("connect", () => {
-      setSocket(socket);
-    });
-
-    socket.on("msg", (data) => {
-      console.log(data);
+    socket.on("msg", (data: any) => {
       setMsg((prev) => [...prev, { ...data }]);
     });
 
     return () => {
-      socket.disconnect();
+      socket.off("msg");
     };
-  }, [session, selectedAnggota]);
+  }, [socket]);
 
   useEffect(() => {
     if (selectedAnggota == undefined) {
       router.push("/admin");
     }
-    console.log(selectedAnggota);
   }, [selectedAnggota, router]);
 
   useEffect(() => {
     queryClient.invalidateQueries();
-    console.log(data);
 
     const manipulatedData = data?.message.map((item: any) => {
       return {
@@ -93,9 +82,17 @@ export default function Chat({ params }: { params: { id: string } }) {
     setMsg(manipulatedData || []);
   }, [queryClient, data]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [msg]);
+
   return (
     <div className="flex h-screen w-full flex-col pl-[210px]">
-      <div className="flex h-16 w-full items-center gap-2 bg-biru1 pl-4 ">
+      <div className="flex py-4 w-full items-center gap-2 bg-biru1 pl-4 ">
         <button
           onClick={() => {
             router.push("/admin/anggota");
@@ -119,7 +116,7 @@ export default function Chat({ params }: { params: { id: string } }) {
           >
             <div
               className={clsx("chat-bubble", {
-                "bg-biru1 text-putih1": item.pengirim == session?.user.role,
+                "bg-gray-300 text-black": item.pengirim == session?.user.role,
                 "bg-biru2 text-white": item.pengirim != session?.user.role,
               })}
             >
@@ -127,6 +124,7 @@ export default function Chat({ params }: { params: { id: string } }) {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="w-full px-2 pt-2">

@@ -3,31 +3,37 @@ import LoadingScreen from "@/components/LoadingScreen";
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoArrowBackOutline, IoSend } from "react-icons/io5";
-import { io } from "socket.io-client";
 import useAnggotaModule from "../lib";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSocket } from "@/components/socketContext";
 
 export default function Chat() {
   const { useGetMsg } = useAnggotaModule();
   const { data: session, status } = useSession();
-  const [socket, setSocket] = useState<any>(null);
   const router = useRouter();
   const [newMsg, setNewMsg] = useState<string>("");
   const [msg, setMsg] = useState<any[]>([]);
   const { data, isPending } = useGetMsg(session?.user.id?.toString());
   const queryClient = useQueryClient();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const { socket } = useSocket(); // Access the socket from context
 
   const handleSendMsg = (e: any) => {
     if (e) e.preventDefault();
 
-    socket.emit("msg", {
-      penerima: "admin",
-      pengirim: "anggota",
-      text: newMsg,
-      id_anggota: session?.user.id,
-    });
+    if (socket) {
+      console.log("ada");
+      socket.emit("msg", {
+        penerima: "admin",
+        pengirim: "anggota",
+        text: newMsg,
+        id_anggota: session?.user.id,
+      });
+    } else {
+      console.log('gada');
+    }
 
     setNewMsg("");
     setMsg((prev) => [
@@ -43,35 +49,21 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    const socket = io("http://localhost:5105", {
-      withCredentials: true,
-      query: {
-        username: session?.user.nama,
-        id: session?.user.id,
-        role: session?.user.role,
-      },
-    });
+    if (!socket) return;
 
-    socket.on("connect", () => {
-      setSocket(socket);
-    });
-
-    socket.on("msg", (data) => {
+    socket.on("msg", (data: any) => {
       if (data.id_anggota == session?.user.id) {
-        console.log(data);
-        console.log(`target ${data.id_anggota}`);
         setMsg((prev) => [...prev, { ...data }]);
       }
     });
 
     return () => {
-      socket.disconnect();
+      socket?.off("msg");
     };
-  }, [session]);
+  }, [session, socket]);
 
   useEffect(() => {
     queryClient.invalidateQueries();
-    console.log(data);
 
     const manipulatedData = data?.message.map((item: any) => {
       return {
@@ -86,13 +78,24 @@ export default function Chat() {
     setMsg(manipulatedData || []);
   }, [queryClient, data]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [msg]);
+
   if (status == "loading") {
     return <LoadingScreen />;
   }
 
   return (
     <div className="flex h-screen w-full flex-col">
-      <div className="flex h-14 w-full items-center gap-2 bg-biru1 px-2">
+      <div className="flex w-full items-center gap-2 bg-biru1 px-2 py-3">
         <button
           onClick={() => {
             router.push("/anggota");
@@ -103,7 +106,7 @@ export default function Chat() {
         </button>
         <p className="text-lg text-putih1">Admin</p>
       </div>
-      <div className="w-full flex-grow pt-2 overflow-y-auto">
+      <div className="w-full flex-grow overflow-y-auto pt-2">
         {msg.map((item, i) => (
           <div
             key={i}
@@ -114,7 +117,7 @@ export default function Chat() {
           >
             <div
               className={clsx("chat-bubble", {
-                "bg-biru1 text-putih1": item.pengirim == session?.user.role,
+                "bg-gray-300 text-black": item.pengirim == session?.user.role,
                 "bg-biru2 text-white": item.pengirim != session?.user.role,
               })}
             >
@@ -122,6 +125,7 @@ export default function Chat() {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <div className="w-full px-2 pt-2">
         <form className="mb-2 flex gap-2" onSubmit={handleSendMsg}>
